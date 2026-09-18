@@ -1,4 +1,4 @@
-# VedaAI — AI Assessment Extraction & Answer Mapping
+# AI Assessment Extraction & Answer Mapping
 
 A web app for teachers to upload a question paper and a student's handwritten answer sheet. VedaAI extracts every question, transcribes and matches every handwritten answer back to its question (even out of order or unlabeled), highlights the exact region on the scanned sheet where each answer was written, grades each answer with AI feedback, and lets teachers save graded results to a personal library for later review.
 
