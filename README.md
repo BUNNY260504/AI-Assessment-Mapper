@@ -2,10 +2,9 @@
 
 A web app for teachers to upload a question paper and a student's handwritten answer sheet. VedaAI extracts every question, transcribes and matches every handwritten answer back to its question (even out of order or unlabeled), highlights the exact region on the scanned sheet where each answer was written, grades each answer with AI feedback, and lets teachers save graded results to a personal library for later review.
 
-## Live URL / Repo
+## Live URL
 
 - Live URL: [vedaai-assessment-mapper-production.up.railway.app](https://vedaai-assessment-mapper-production.up.railway.app)
-- GitHub repo: [BUNNY260504/vedaai-assessment-mapper](https://github.com/BUNNY260504/vedaai-assessment-mapper)
 
 ## Features
 
@@ -48,7 +47,7 @@ A web app for teachers to upload a question paper and a student's handwritten an
 
 ## Tech stack
 
-- **Backend:** Node.js, Express, Multer (in-memory uploads), `pdfjs-dist` + `@napi-rs/canvas` (PDF→PNG rasterization, no native compile step so it deploys cleanly), `@google/genai` (Gemini SDK). No database — an in-memory `Map` holds exam state for the life of the process, matching the assignment's "no database required" constraint.
+- **Backend:** Node.js, Express, Multer (in-memory uploads), `pdfjs-dist` + `@napi-rs/canvas` (PDF→PNG rasterization, no native compile step so it deploys cleanly), `@google/genai` (Gemini SDK). No database — an in-memory `Map` holds exam state for the life of the process.
 - **Frontend:** React 19 (Vite), React Router, Tailwind CSS v4, Axios, lucide-react icons. Built as static assets and served by the same Express process in production (single deployable service, no CORS/two-service coordination needed).
 
 ## AI model used
@@ -95,19 +94,3 @@ For a single-process production build:
 cd client && npm install && npm run build
 cd ../server && npm install && npm start   # serves client/dist + API on one port
 ```
-
-## Deployment
-
-Deployed on **Railway** via `railway.json` at the repo root, which builds the client, installs server dependencies, and starts the Express server (which serves the built client alongside the API on one port — no database or second service required). A minimal root `package.json` exists purely so Railway's Nixpacks builder detects this as a Node project and provisions a Node runtime, since the real `package.json` files live in `client/` and `server/`. Set `GEMINI_API_KEY` and `GEMINI_MODEL` in the service's Variables tab, and generate a public domain under Settings → Networking.
-
-`render.yaml` is also present for deploying to Render instead, using the same build/start commands as a Blueprint.
-
-## Assumptions & limitations
-
-- **In-memory storage only:** exam data (including page images) lives in the Node process's memory and is cleared on restart, and auto-expired after 2 hours. This matches the assignment's "no database required" note but means the service isn't horizontally scalable as-is and a restart loses in-flight exams.
-- **My Library is a client-side bookmark list, not a data store:** saved entries live in the browser's `localStorage` (name, summary, exam id) and link back to the full result by id — once that exam expires from the server's in-memory store (2 hours, or any server restart), the saved entry becomes a dead link rather than a durable record.
-- **Single student per run:** the flow is scoped to one question paper + one answer sheet at a time, per the assignment brief (no batch/roster handling).
-- **Answer matching is number-based only:** the model reads the question number the student wrote next to their answer; if a student writes no number and no legible cue at all, that answer will land in "unmatched" rather than being guessed into place — this is intentional (matches the "answers that don't match any question" requirement) rather than a bug.
-- **Grading is AI-generated and advisory:** marks/feedback are produced by the same LLM and are meant as a fast first pass for the teacher, not an authoritative grade.
-- **Bounding box precision** depends on Gemini's spatial grounding for the given scan quality/handwriting; very dense or overlapping handwriting can produce a slightly loose box.
-- **Gemini API quota/cost:** a free-tier API key is capped at a small number of requests per day; each exam costs 3 Gemini calls (~$0.01–0.04 total on the paid tier depending on page count). Enabling billing on the Google Cloud project removes the daily cap.
