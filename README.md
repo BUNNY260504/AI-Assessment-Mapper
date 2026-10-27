@@ -4,8 +4,6 @@ A web app for teachers to upload a question paper and a student's handwritten an
 
 ## Live URL
 
-- Live URL: [vedaai-assessment-mapper-production.up.railway.app](https://vedaai-assessment-mapper-production.up.railway.app)
-
 ## Features
 
 **Upload & extraction**
